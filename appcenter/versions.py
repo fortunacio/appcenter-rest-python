@@ -174,7 +174,7 @@ class AppCenterVersionsClient(AppCenterDerivedClient):
 
         return None
 
-    def get_upload_url(self, *, owner_name: str, app_name: str) -> CreateReleaseUploadResponse:
+    def get_upload_url(self, *, owner_name: str, app_name: str, version:str) -> CreateReleaseUploadResponse:
         """Get the App Center release identifier for the app version (usually build number).
 
         :param str owner_name: The name of the app account owner
@@ -189,7 +189,7 @@ class AppCenterVersionsClient(AppCenterDerivedClient):
         for attempt in range(3):
             self.log.debug(f"Attempting post {attempt}/3 in get_upload_url")
             try:
-                response = self.post(request_url, data={})
+                response = self.post(request_url, data={'build_version': version})
                 if response.ok:
                     break
             except Exception as ex:
@@ -549,6 +549,7 @@ class AppCenterVersionsClient(AppCenterDerivedClient):
         *,
         owner_name: str,
         app_name: str,
+        version: str,
         binary_path: str,
         release_notes: str,
         branch_name: Optional[str] = None,
@@ -575,7 +576,7 @@ class AppCenterVersionsClient(AppCenterDerivedClient):
             raise FileNotFoundError(f"Could not find binary: {binary_path}")
 
         create_release_upload_response = self.get_upload_url(
-            owner_name=owner_name, app_name=app_name
+            owner_name=owner_name, app_name=app_name, version=version
         )
 
         success = self.upload_binary(
@@ -619,6 +620,7 @@ class AppCenterVersionsClient(AppCenterDerivedClient):
         *,
         owner_name: str,
         app_name: str,
+        version: str,
         binary_path: str,
         group_id: str,
         release_notes: str,
@@ -648,6 +650,7 @@ class AppCenterVersionsClient(AppCenterDerivedClient):
         release_id = self.upload_build(
             owner_name=owner_name,
             app_name=app_name,
+            version=version,
             binary_path=binary_path,
             release_notes=release_notes,
             branch_name=branch_name,
